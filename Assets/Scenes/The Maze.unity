@@ -334,8 +334,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallsHeight: 0
   lvlImages:
-  - {fileID: 2800000, guid: a4cf773ad53c64ee0b542ba6940e52f8, type: 3}
+  - {fileID: 2800000, guid: 351e05ad32c59e81d904802af534fe1c, type: 3}
   - {fileID: 2800000, guid: d1bf80bee51bc3181ab12d575cf15b96, type: 3}
+  - {fileID: 2800000, guid: e013b8eb36d19d8a9b0edace4a7a16b0, type: 3}
   levelToLoad: 0
   colorMode: 0
 --- !u!1 &1246417409

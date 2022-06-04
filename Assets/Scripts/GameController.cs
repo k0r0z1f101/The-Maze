@@ -41,11 +41,13 @@ public class GameController : MonoBehaviour
         int nbrOfCols = levelImg.height;
 
         Color whiteColor = new Color(1.0f,1.0f,1.0f,1.0f);
+        Color blackColor = new Color(0.0f,0.0f,0.0f,1.0f);
+        Color pinkColor = new Color(1.0f,0.0f,0.949f,1.0f);
         for(int i = 0; i < nbrOfRows; ++i)
           for(int j = 0; j < nbrOfCols; ++j)
           {
               Color pixColor = levelImg.GetPixel(i, j);
-              if(pixColor != whiteColor)
+              if(pixColor == blackColor)
                 convertedPix.Add(new Vector2(i, j));
           }
 
