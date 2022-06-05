@@ -5,11 +5,24 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
   //GameObject to follow
-  [SerializeField]
   private GameObject player;
 
     void LateUpdate()
     {
-      transform.position = player.transform.position;
+      if(player)
+      {
+        transform.position = player.transform.position;
+        transform.rotation = player.transform.rotation;
+      }
+    }
+
+    public void ResetPlayer()
+    {
+      player = null;
+    }
+
+    public void SetPlayer(GameObject obj)
+    {
+      player = obj;
     }
 }

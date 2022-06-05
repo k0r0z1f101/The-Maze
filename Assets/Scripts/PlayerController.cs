@@ -18,14 +18,14 @@ public class PlayerController : MonoBehaviour
   //Walk
   [Header("Vitesse de marche")]
   [SerializeField]
-  private int walkSpeed;
+  private int walkSpeed = 2;
   private Vector2 walkValue;
   private bool isWalking;
   private bool isMoving;
 
   //Turning
   [SerializeField]
-  private int rotSpeed;
+  private int rotSpeed = 2;
 
   //Run
   private InputAction runAction;
@@ -39,12 +39,12 @@ public class PlayerController : MonoBehaviour
   private bool isJumping;
   [Header("Force du saut")]
   [SerializeField]
-  private float jumpStrength = 1.0f;
+  private float jumpStrength = 2.0f;
 
   //Gravity
   [Header("Force de Gravité")]
   [SerializeField]
-  private float gravity;
+  private float gravity = 9.8f;
   private float currentFallingSpeed = 0.0f;
   private float maxFallingSpeed = 55.0f;
 
@@ -52,11 +52,15 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
       controller = GetComponent<CharacterController>();
-      playerInput = GetComponent<PlayerInput>();
       animator = transform.GetChild(0).GetComponent<Animator>();
+      CameraController cam = GameObject.Find("CameraContainer").GetComponent<CameraController>();
+      cam.SetPlayer(gameObject);
+
+      playerInput = GetComponent<PlayerInput>();
       walkAction = playerInput.actions["Walk"];
       runAction = playerInput.actions["Run"];
       jumpAction = playerInput.actions["Jump"];
+      playerInput.actions.Enable();
     }
 
     void Update()
