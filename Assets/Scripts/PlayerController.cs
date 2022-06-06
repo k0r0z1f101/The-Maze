@@ -158,8 +158,10 @@ public class PlayerController : MonoBehaviour
       if(other.tag == "Coin")
       {
         Destroy(other.gameObject);
+        // GameObject.Find("GameController").GetComponent<GameController>().DestroyCoin(other.gameObject);
         ++_inventory.coins;
         Debug.Log(_inventory.coins);
+        GameObject.Find("GameController").GetComponent<GameController>().DisplayCoins(1);
       }
     }
 }

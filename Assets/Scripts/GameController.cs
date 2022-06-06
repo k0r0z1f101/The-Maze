@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using System.Reflection;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class GameController : MonoBehaviour
 {
@@ -110,6 +111,7 @@ public class GameController : MonoBehaviour
             coins = new GameObject("CoinsContainer");
 
             DrawLevel();
+            DisplayCoins();
             PositionHero();
         }
     }
@@ -201,4 +203,15 @@ public class GameController : MonoBehaviour
       Instantiate(newCoin, new Vector3(pos.x, 0.5f, pos.y), Quaternion.identity).transform.SetParent(coins.transform);
     }
 
+    void CreateUI()
+    {
+
+    }
+
+    public void DisplayCoins(int off = 0)
+    {
+      Debug.Log(coins.transform.childCount - off);
+      Debug.Log(GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TMP_Text>());
+      GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TMP_Text>().text = (coins.transform.childCount - off).ToString();
+    }
 }

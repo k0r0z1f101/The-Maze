@@ -61,7 +61,7 @@ ConstantForce:
   m_Enabled: 1
   m_Force: {x: 0, y: 0, z: 0}
   m_RelativeForce: {x: 0, y: 0, z: 0}
-  m_Torque: {x: 1.4952964, y: -1.5653143, z: 0.2723713}
+  m_Torque: {x: 1.7886779, y: 0.22022057, z: -2.256979}
   m_RelativeTorque: {x: 0, y: 0, z: 0}
 --- !u!64 &3981409504640876356
 MeshCollider:
