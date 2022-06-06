@@ -9,7 +9,9 @@ using UnityEngine.InputSystem;
 public class GameController : MonoBehaviour
 {
     //list of converted pictures
-    private List<Vector2> convertedPix;
+    private List<Vector2> convertedWalls;
+    //list of converted pictures
+    private List<Vector2> convertedCoins;
 
     [Header("height of the walls")]
     [SerializeField]
@@ -27,6 +29,7 @@ public class GameController : MonoBehaviour
     private int levelToLoad = 0;
 
     private GameObject ground;
+    private GameObject coins;
 
     //Color mode, will copy the pictures each pixel to wall colors
     [Header("colored walls if true")]
@@ -38,17 +41,21 @@ public class GameController : MonoBehaviour
 
     private CameraController cam;
 
+    GameObject goldCoin;
+
+
     void ConvPixToVec()
     {
-        convertedPix = new List<Vector2>();
+        convertedWalls = new List<Vector2>();
+        convertedCoins = new List<Vector2>();
         levelImg = new Texture2D(0, 0);
         levelImg = lvlImages[levelToLoad];
         int nbrOfRows = levelImg.width;
         int nbrOfCols = levelImg.height;
 
-        Color whiteColor = new Color(1.0f,1.0f,1.0f,1.0f);
+        Color yellowColor = new Color(1.0f,1.0f,0.0f,1.0f);
         Color blackColor = new Color(0.0f,0.0f,0.0f,1.0f);
-        Color pinkColor = new Color(1.0f,0.000f,1.0f,1.0f);
+        Color pinkColor = new Color(1.0f,0.0f,1.0f,1.0f);
         for(int i = 0; i < nbrOfRows; ++i)
           for(int j = 0; j < nbrOfCols; ++j)
           {
@@ -56,7 +63,7 @@ public class GameController : MonoBehaviour
 
               //walls array
               if(pixColor == blackColor)
-                convertedPix.Add(new Vector2(i, j));
+                convertedWalls.Add(new Vector2(i, j));
 
               //hero position
               if(pixColor == pinkColor)
@@ -65,15 +72,23 @@ public class GameController : MonoBehaviour
                 pos.y = j;
               }
 
+              //gold coins array
+              if(pixColor == yellowColor)
+                convertedCoins.Add(new Vector2(i, j));
+
           }
 
     }
 
     void Awake()
     {
-        ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        ground.GetComponent<Renderer>().material.color = Color.red;
-        cam = GameObject.Find("CameraContainer").GetComponent<CameraController>();
+      ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+      ground.GetComponent<Renderer>().material.color = Color.red;
+      cam = GameObject.Find("CameraContainer").GetComponent<CameraController>();
+
+      //Set Gold Coin object as template for future coins
+      goldCoin = Resources.Load("GoldCoinPrefab") as GameObject;
+      goldCoin.transform.localScale = new Vector3(50, 50, 50);
     }
 
     void OnValidate()
@@ -88,6 +103,11 @@ public class GameController : MonoBehaviour
             ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.GetComponent<Renderer>().material.color = Color.red;
 
+            coins = GameObject.Find("CoinsContainer");
+            if(coins)
+              Destroy(coins);
+            coins = new GameObject("CoinsContainer");
+
             DrawLevel();
             PositionHero();
         }
@@ -98,13 +118,18 @@ public class GameController : MonoBehaviour
         ground.transform.localScale = new Vector3(levelImg.width * 0.1f, 0.01f, levelImg.height * 0.1f);
         ground.transform.position = new Vector3(levelImg.width * 0.5f, 0.0f, levelImg.height * 0.5f);
         if(!colorMode)
-          for(int i = 0; i < convertedPix.Count; ++i)
+        {
+          for(int i = 0; i < convertedWalls.Count; ++i)
           {
               GameObject newBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
               newBlock.transform.localScale = new Vector3(1.0f, wallsHeight, 1.0f);
-              newBlock.transform.position = new Vector3(convertedPix[i].x, (wallsHeight * 0.5f) + 0.01f, convertedPix[i].y);
+              newBlock.transform.position = new Vector3(convertedWalls[i].x, (wallsHeight * 0.5f) + 0.01f, convertedWalls[i].y);
               newBlock.transform.SetParent(ground.transform);
           }
+
+          for(int i = 0; i < convertedCoins.Count; ++i)
+            PlaceCoin(new Vector2(convertedCoins[i].x, convertedCoins[i].y));
+        }
         else
         {
             levelImg = new Texture2D(0, 0);
@@ -165,9 +190,14 @@ public class GameController : MonoBehaviour
       controlScript.enabled = true;
     }
 
-    void PlaceCoin()
+    void PlaceCoin(Vector2 pos)
     {
+      GameObject newCoin = goldCoin;
 
+      ConstantForce force = newCoin.GetComponent<ConstantForce>();
+      force.torque = new Vector3(Random.Range(-3.0f, 3.0f), Random.Range(-3.0f, 3.0f), Random.Range(-3.0f, 3.0f));
+
+      Instantiate(newCoin, new Vector3(pos.x, 0.5f, pos.y), Quaternion.identity).transform.SetParent(coins.transform);
     }
 
 }

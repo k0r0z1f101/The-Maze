@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// using Player.Inventory;
+
 public class PlayerController : MonoBehaviour
 {
   //character parent gameobject
@@ -47,6 +49,8 @@ public class PlayerController : MonoBehaviour
   private float gravity = 9.8f;
   private float currentFallingSpeed = 0.0f;
   private float maxFallingSpeed = 55.0f;
+
+  private Player.Inventory _inventory;
 
     // Start is called before the first frame update
     void Awake()
@@ -136,8 +140,8 @@ public class PlayerController : MonoBehaviour
     {
       if(isMoving)
       {
-        Quaternion rot = Quaternion.LookRotation(new Vector3(walkValue.x, 0, walkValue.y));
-        transform.rotation = Quaternion.Lerp(transform.rotation, rot, rotSpeed * Time.deltaTime * (isRunning ? 2.5f : 1.0f));
+        // Quaternion rot = Quaternion.LookRotation(new Vector3(walkValue.x, 0, walkValue.y));
+        transform.rotation = Quaternion.Lerp(transform.rotation, new Quaternion(0,0,0,1), rotSpeed * Time.deltaTime * (isRunning ? 2.5f : 1.0f));
       }
     }
 
@@ -150,5 +154,13 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("jumpRunningTrigger");
       else
         animator.SetTrigger("jumpTrigger");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // Debug.Log(other.name);
+        Destroy(other.gameObject);
+        ++_inventory.coins;
+        Debug.Log(_inventory.coins);
     }
 }
