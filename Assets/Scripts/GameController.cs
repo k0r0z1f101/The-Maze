@@ -89,6 +89,7 @@ public class GameController : MonoBehaviour
       //Set Gold Coin object as template for future coins
       goldCoin = Resources.Load("GoldCoinPrefab") as GameObject;
       goldCoin.transform.localScale = new Vector3(50, 50, 50);
+      goldCoin.tag = "Coin";
     }
 
     void OnValidate()

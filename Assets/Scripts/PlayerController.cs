@@ -26,8 +26,11 @@ public class PlayerController : MonoBehaviour
   private bool isMoving;
 
   //Turning
+  [Header("Vitesse de rotation")]
   [SerializeField]
-  private int rotSpeed = 2;
+  private int rotSpeed = 45;
+  private Vector2 turnValue;
+  private InputAction turnAction;
 
   //Run
   private InputAction runAction;
@@ -62,6 +65,7 @@ public class PlayerController : MonoBehaviour
 
       playerInput = GetComponent<PlayerInput>();
       walkAction = playerInput.actions["Walk"];
+      turnAction = playerInput.actions["Turn"];
       runAction = playerInput.actions["Run"];
       jumpAction = playerInput.actions["Jump"];
       playerInput.actions.Enable();
@@ -70,7 +74,6 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
       GetInputValues();
-      SetRotation();
       if(!isJumping)
         ApplyGravity(); //apply gravity before move
       Move(); //position transformation
@@ -80,11 +83,12 @@ public class PlayerController : MonoBehaviour
     void Move()
     {
       float walkMod = (!controller.isGrounded ? (isRunning ? jumpStrength * 2.5f : jumpStrength) : 1.0f);
-      float newX = walkValue.x * walkMod;
-      float newY = (isJumping && transform.position.y < jumpStrength ? 3.0f : 0.0f) - currentFallingSpeed;
-      float newZ = walkValue.y * walkMod;
 
-      controller.Move(new Vector3(newX, newY, newZ) * walkSpeed * (isRunning ? 2.5f : 1.0f) * Time.deltaTime);
+      float newY = (isJumping && transform.position.y < jumpStrength ? 3.0f : 0.0f) - currentFallingSpeed;
+
+      controller.Move(new Vector3(0, newY, 0) * walkSpeed * (isRunning ? 2.5f : 1.0f) * Time.deltaTime);
+      transform.Translate(walkValue.y * transform.forward * walkSpeed * (isRunning ? 2.5f : 1.0f) * Time.deltaTime, Space.World);
+      transform.Rotate(0, turnValue.x * rotSpeed * (isRunning ? 2.5f : 1.0f) * Time.deltaTime, 0, Space.World);
     }
 
     void ApplyGravity()
@@ -129,19 +133,12 @@ public class PlayerController : MonoBehaviour
       runValue = runAction.ReadValue<float>();
       isRunning = runValue == 1 ? true : false;
 
+      turnValue = turnAction.ReadValue<Vector2>();
+
       if(!isJumping)
       {
         jumpValue = jumpAction.ReadValue<float>();
         jumpTrigger = jumpValue == 1 ? true : false;
-      }
-    }
-
-    void SetRotation()
-    {
-      if(isMoving)
-      {
-        // Quaternion rot = Quaternion.LookRotation(new Vector3(walkValue.x, 0, walkValue.y));
-        transform.rotation = Quaternion.Lerp(transform.rotation, new Quaternion(0,0,0,1), rotSpeed * Time.deltaTime * (isRunning ? 2.5f : 1.0f));
       }
     }
 
@@ -158,9 +155,11 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Debug.Log(other.name);
+      if(other.tag == "Coin")
+      {
         Destroy(other.gameObject);
         ++_inventory.coins;
         Debug.Log(_inventory.coins);
+      }
     }
 }

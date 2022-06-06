@@ -34,12 +34,12 @@
                 },
                 {
                     "name": "Turn",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "913a904b-fbf2-46f1-af9a-d15ba28ddffd",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [

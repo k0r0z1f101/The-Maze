@@ -189,7 +189,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 2
-  rotSpeed: 2
+  rotSpeed: 45
   jumpStrength: 2
   gravity: 9.8
 --- !u!114 &942239754

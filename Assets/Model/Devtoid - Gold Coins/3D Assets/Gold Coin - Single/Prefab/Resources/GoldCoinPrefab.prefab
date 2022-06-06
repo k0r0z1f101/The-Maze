@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3981409504640876356}
   m_Layer: 0
   m_Name: GoldCoinPrefab
-  m_TagString: Untagged
+  m_TagString: Coin
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -61,7 +61,7 @@ ConstantForce:
   m_Enabled: 1
   m_Force: {x: 0, y: 0, z: 0}
   m_RelativeForce: {x: 0, y: 0, z: 0}
-  m_Torque: {x: 2.5880592, y: -1.0606961, z: -0.5675864}
+  m_Torque: {x: 1.4952964, y: -1.5653143, z: 0.2723713}
   m_RelativeTorque: {x: 0, y: 0, z: 0}
 --- !u!64 &3981409504640876356
 MeshCollider:
