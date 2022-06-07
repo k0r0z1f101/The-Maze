@@ -53,6 +53,10 @@ public class PlayerController : MonoBehaviour
   private float currentFallingSpeed = 0.0f;
   private float maxFallingSpeed = 55.0f;
 
+  //coins collected
+  [Header("Pièces ramassées")]
+  [SerializeField]
+  private int numberCoins;
   private Player.Inventory _inventory;
 
     // Start is called before the first frame update
@@ -160,8 +164,15 @@ public class PlayerController : MonoBehaviour
         Destroy(other.gameObject);
         // GameObject.Find("GameController").GetComponent<GameController>().DestroyCoin(other.gameObject);
         ++_inventory.coins;
-        Debug.Log(_inventory.coins);
+        // Debug.Log(_inventory.coins);
+        numberCoins = _inventory.coins;
         GameObject.Find("GameController").GetComponent<GameController>().DisplayCoins(1);
       }
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // print the impact point
+        // Debug.Log("I impacted at: " + hit.gameObject);
     }
 }

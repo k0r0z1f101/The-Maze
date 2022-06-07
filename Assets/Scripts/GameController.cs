@@ -46,6 +46,10 @@ public class GameController : MonoBehaviour
 
     GameObject canvasGO;
 
+    private Vector2 ballPos;
+
+    GameObject ball;
+
 
     void ConvPixToVec()
     {
@@ -59,6 +63,7 @@ public class GameController : MonoBehaviour
         Color yellowColor = new Color(1.0f,1.0f,0.0f,1.0f);
         Color blackColor = new Color(0.0f,0.0f,0.0f,1.0f);
         Color pinkColor = new Color(1.0f,0.0f,1.0f,1.0f);
+        Color redColor = new Color(1.0f,0.0f,0.0f,1.0f);
         for(int i = 0; i < nbrOfRows; ++i)
           for(int j = 0; j < nbrOfCols; ++j)
           {
@@ -75,10 +80,16 @@ public class GameController : MonoBehaviour
                 pos.y = j;
               }
 
+              //ball position
+              if(pixColor == redColor)
+              {
+                ballPos.x = i;
+                ballPos.y = j;
+              }
+
               //gold coins array
               if(pixColor == yellowColor)
                 convertedCoins.Add(new Vector2(i, j));
-
           }
 
     }
@@ -119,9 +130,15 @@ public class GameController : MonoBehaviour
               Destroy(coins);
             coins = new GameObject("CoinsContainer");
 
+            ball = GameObject.Find("Ball");
+            if(ball)
+              Destroy(ball);
+            ball = new GameObject("Ball");
+
             DrawLevel();
             DisplayCoins();
             PositionHero();
+            PlaceBall();
         }
     }
 
@@ -212,6 +229,18 @@ public class GameController : MonoBehaviour
       Instantiate(newCoin, new Vector3(pos.x, 0.5f, pos.y), Quaternion.identity).transform.SetParent(coins.transform);
     }
 
+    void PlaceBall()
+    {
+      ball.transform.position = new Vector3(ballPos.x, 0.5f , ballPos.y);
+      GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+      sphere.transform.SetParent(ball.transform, false);
+
+      ball.AddComponent<Rigidbody>();
+      Material ballTexture = Resources.Load<Material>("Ball");
+      MeshRenderer meshRenderer = sphere.GetComponent<MeshRenderer>();
+      meshRenderer.material = ballTexture;
+    }
+
     void CreateUI()
     {
       canvasGO.AddComponent<Canvas>();
@@ -224,8 +253,6 @@ public class GameController : MonoBehaviour
       coinsHUD.transform.SetParent(canvasGO.transform);
       coinsHUD.AddComponent<RectTransform>();
       RectTransform coinsHUDRect = coinsHUD.GetComponent<RectTransform>();
-      // coinsHUDRect.offsetMin = new Vector2(0, 0);
-      // coinsHUDRect.offsetMax = new Vector2(30, 50);
       coinsHUDRect.anchoredPosition = new Vector2(0, -30);
       coinsHUDRect.anchorMin = new Vector2(0.5f, 1);
       coinsHUDRect.anchorMax = new Vector2(0.5f, 1);
@@ -234,12 +261,15 @@ public class GameController : MonoBehaviour
       GameObject textBG = new GameObject("TextBG");
       textBG.transform.SetParent(coinsHUD.transform);
       textBG.AddComponent<RawImage>();
+      RawImage textBGImg = textBG.GetComponent<RawImage>();
+      Texture2D textTexture = Resources.Load<Texture2D>("button");
+      textBGImg.texture = textTexture;
       RectTransform textBGRect = textBG.GetComponent<RectTransform>();
       textBGRect.anchoredPosition = new Vector2(0, 0);
       textBGRect.sizeDelta = new Vector2(0, 0);
       textBG.AddComponent<VerticalLayoutGroup>();
       VerticalLayoutGroup textBGvertical = textBG.GetComponent<VerticalLayoutGroup>();
-      RectOffset tempPadding = new RectOffset(2, 2, 2, 2);
+      RectOffset tempPadding = new RectOffset(30, 30, 8, 8);
       textBGvertical.padding = tempPadding;
       textBGvertical.childAlignment = TextAnchor.MiddleCenter;
       textBG.AddComponent<ContentSizeFitter>();
@@ -259,8 +289,9 @@ public class GameController : MonoBehaviour
 
     public void DisplayCoins(int off = 0)
     {
-      Debug.Log(coins.transform.childCount - off);
+      // Debug.Log(coins.transform.childCount - off);
       // Debug.Log(GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>());
-      GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>().text = (coins.transform.childCount - off).ToString();
+      string str = coins.transform.childCount - off == 1 ? "One last coin!" : (coins.transform.childCount - off == 0 ? "You won!!!" : (coins.transform.childCount - off).ToString() + " Coins left");
+      GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>().text = str;
     }
 }
