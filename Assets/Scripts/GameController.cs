@@ -44,6 +44,8 @@ public class GameController : MonoBehaviour
 
     GameObject goldCoin;
 
+    GameObject canvasGO;
+
 
     void ConvPixToVec()
     {
@@ -95,7 +97,8 @@ public class GameController : MonoBehaviour
 
     void OnValidate()
     {
-        if(ground){
+        if(ground)
+        {
             wallsHeight = Mathf.Clamp(wallsHeight,0,10);
 
             if(!colorMode)
@@ -104,6 +107,12 @@ public class GameController : MonoBehaviour
             Destroy(ground);
             ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.GetComponent<Renderer>().material.color = Color.red;
+
+            canvasGO = GameObject.Find("Canvas");
+            if(canvasGO)
+              Destroy(canvasGO);
+            canvasGO = new GameObject("Canvas");
+            CreateUI();
 
             coins = GameObject.Find("CoinsContainer");
             if(coins)
@@ -205,13 +214,53 @@ public class GameController : MonoBehaviour
 
     void CreateUI()
     {
+      canvasGO.AddComponent<Canvas>();
+      canvasGO.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+      canvasGO.AddComponent<CanvasScaler>();
+      canvasGO.AddComponent<GraphicRaycaster>();
 
+
+      GameObject coinsHUD = new GameObject("CoinsHUD");
+      coinsHUD.transform.SetParent(canvasGO.transform);
+      coinsHUD.AddComponent<RectTransform>();
+      RectTransform coinsHUDRect = coinsHUD.GetComponent<RectTransform>();
+      // coinsHUDRect.offsetMin = new Vector2(0, 0);
+      // coinsHUDRect.offsetMax = new Vector2(30, 50);
+      coinsHUDRect.anchoredPosition = new Vector2(0, -30);
+      coinsHUDRect.anchorMin = new Vector2(0.5f, 1);
+      coinsHUDRect.anchorMax = new Vector2(0.5f, 1);
+      coinsHUDRect.sizeDelta = new Vector2(0, 0);
+
+      GameObject textBG = new GameObject("TextBG");
+      textBG.transform.SetParent(coinsHUD.transform);
+      textBG.AddComponent<RawImage>();
+      RectTransform textBGRect = textBG.GetComponent<RectTransform>();
+      textBGRect.anchoredPosition = new Vector2(0, 0);
+      textBGRect.sizeDelta = new Vector2(0, 0);
+      textBG.AddComponent<VerticalLayoutGroup>();
+      VerticalLayoutGroup textBGvertical = textBG.GetComponent<VerticalLayoutGroup>();
+      RectOffset tempPadding = new RectOffset(2, 2, 2, 2);
+      textBGvertical.padding = tempPadding;
+      textBGvertical.childAlignment = TextAnchor.MiddleCenter;
+      textBG.AddComponent<ContentSizeFitter>();
+      ContentSizeFitter textBGFitter = textBG.GetComponent<ContentSizeFitter>();
+      textBGFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+      textBGFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+      //add textmeshpro object
+      GameObject tmp = new GameObject("Text (TMP)");
+      tmp.transform.SetParent(textBG.transform);
+      tmp.AddComponent<RectTransform>();
+      RectTransform tmpRect = tmp.GetComponent<RectTransform>();
+      tmp.AddComponent<TextMeshProUGUI>();
+      tmp.GetComponent<TextMeshProUGUI>().color = Color.black;
+      tmp.GetComponent<TextMeshProUGUI>().text = "25";
     }
 
     public void DisplayCoins(int off = 0)
     {
       Debug.Log(coins.transform.childCount - off);
-      Debug.Log(GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TMP_Text>());
-      GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TMP_Text>().text = (coins.transform.childCount - off).ToString();
+      // Debug.Log(GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>());
+      GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>().text = (coins.transform.childCount - off).ToString();
     }
 }
