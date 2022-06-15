@@ -59,10 +59,16 @@ public class PlayerController : MonoBehaviour
   private int numberCoins;
   private Player.Inventory _inventory;
 
+  //audio
+  private AudioSource audioSource;
+  private AudioClip coin;
+
     // Start is called before the first frame update
     void Awake()
     {
       controller = GetComponent<CharacterController>();
+      audioSource = GetComponent<AudioSource>();
+      coin = Resources.Load("collectcoin") as AudioClip;
       animator = transform.GetChild(0).GetComponent<Animator>();
       CameraController cam = GameObject.Find("CameraContainer").GetComponent<CameraController>();
       cam.SetPlayer(gameObject);
@@ -81,6 +87,7 @@ public class PlayerController : MonoBehaviour
       if(!isJumping)
         ApplyGravity(); //apply gravity before move
       Move(); //position transformation
+
       SetStates();
     }
 
@@ -161,6 +168,8 @@ public class PlayerController : MonoBehaviour
     {
       if(other.tag == "Coin")
       {
+        audioSource.pitch = Random.Range(0.7f, 2.0f);
+        audioSource.PlayOneShot(coin);
         Destroy(other.gameObject);
         // GameObject.Find("GameController").GetComponent<GameController>().DestroyCoin(other.gameObject);
         ++_inventory.coins;

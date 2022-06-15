@@ -9,10 +9,12 @@ using TMPro;
 
 public class GameController : MonoBehaviour
 {
-    //list of converted pictures
+    //list of converted walls
     private List<Vector2> convertedWalls;
-    //list of converted pictures
+    //list of converted coins
     private List<Vector2> convertedCoins;
+    //list of converted doors
+    private List<Vector2> convertedDoors;
 
     [Header("height of the walls")]
     [SerializeField]
@@ -31,6 +33,7 @@ public class GameController : MonoBehaviour
 
     private GameObject ground;
     private GameObject coins;
+    private GameObject doorsContainer;
 
     //Color mode, will copy the pictures each pixel to wall colors
     [Header("colored walls if true")]
@@ -44,6 +47,8 @@ public class GameController : MonoBehaviour
 
     GameObject goldCoin;
 
+    GameObject door;
+
     GameObject canvasGO;
 
     private Vector2 ballPos;
@@ -55,6 +60,7 @@ public class GameController : MonoBehaviour
     {
         convertedWalls = new List<Vector2>();
         convertedCoins = new List<Vector2>();
+        convertedDoors = new List<Vector2>();
         levelImg = new Texture2D(0, 0);
         levelImg = lvlImages[levelToLoad];
         int nbrOfRows = levelImg.width;
@@ -64,6 +70,7 @@ public class GameController : MonoBehaviour
         Color blackColor = new Color(0.0f,0.0f,0.0f,1.0f);
         Color pinkColor = new Color(1.0f,0.0f,1.0f,1.0f);
         Color redColor = new Color(1.0f,0.0f,0.0f,1.0f);
+        Color blueColor = new Color(0.0f,0.0f,1.0f,1.0f);
         for(int i = 0; i < nbrOfRows; ++i)
           for(int j = 0; j < nbrOfCols; ++j)
           {
@@ -90,6 +97,10 @@ public class GameController : MonoBehaviour
               //gold coins array
               if(pixColor == yellowColor)
                 convertedCoins.Add(new Vector2(i, j));
+
+              //doors array
+              if(pixColor == blueColor)
+                convertedDoors.Add(new Vector2(i, j));
           }
 
     }
@@ -104,6 +115,10 @@ public class GameController : MonoBehaviour
       goldCoin = Resources.Load("GoldCoinPrefab") as GameObject;
       goldCoin.transform.localScale = new Vector3(50, 50, 50);
       goldCoin.tag = "Coin";
+
+      //Set Door object as template for future doors
+      door = Resources.Load("Door") as GameObject;
+      door.tag = "Door";
     }
 
     void OnValidate()
@@ -130,6 +145,11 @@ public class GameController : MonoBehaviour
               Destroy(coins);
             coins = new GameObject("CoinsContainer");
 
+            doorsContainer = GameObject.Find("DoorsContainer");
+            if(doorsContainer)
+              Destroy(doorsContainer);
+            doorsContainer   = new GameObject("DoorsContainer");
+
             ball = GameObject.Find("Ball");
             if(ball)
               Destroy(ball);
@@ -155,6 +175,9 @@ public class GameController : MonoBehaviour
               newBlock.transform.position = new Vector3(convertedWalls[i].x, (wallsHeight * 0.5f) + 0.01f, convertedWalls[i].y);
               newBlock.transform.SetParent(ground.transform);
           }
+
+          for(int i = 0; i < convertedDoors.Count; ++i)
+            PositionDoor(new Vector2(convertedDoors[i].x, convertedDoors[i].y));
 
           for(int i = 0; i < convertedCoins.Count; ++i)
             PlaceCoin(new Vector2(convertedCoins[i].x, convertedCoins[i].y));
@@ -204,7 +227,11 @@ public class GameController : MonoBehaviour
       inputs.actions = actions;
 
       //ADD ROBOT KYLE TO NEW GAMEOBJECT
-      GameObject kyle = Resources.Load("Robot Kyle") as GameObject;
+      GameObject kyle = Resources.Load("Robot Kyle Prefab") as GameObject;
+      kyle.AddComponent<AudioSource>();
+      AudioSource kyleAudioSource = kyle.GetComponent<AudioSource>();
+      kyleAudioSource.spatialBlend = 1.0f;
+      kyle.AddComponent<Footsteps>();
 
       //set animator to "PlayerAnimController"
       RuntimeAnimatorController animatorCont = Resources.Load("PlayerAnimController") as RuntimeAnimatorController;
@@ -214,9 +241,24 @@ public class GameController : MonoBehaviour
       //instantiate kyle with characterController as parent
       Instantiate(kyle, new Vector3(pos.x, 0, pos.y), Quaternion.identity).transform.SetParent(characterController.transform);
 
+      //add AudioSource AddComponent
+      characterController.AddComponent<AudioSource>();
+      AudioSource audioSource = characterController.GetComponent<AudioSource>();
+      audioSource.playOnAwake = false;
+      audioSource.loop = true;
+      audioSource.spatialBlend = 1.0f;
+      AudioClip audioClip = Resources.Load("footsteps") as AudioClip;
+      audioSource.clip = audioClip;
+
       //add Player Controller Script
       PlayerController controlScript = characterController.AddComponent<PlayerController>();
       controlScript.enabled = true;
+    }
+
+    void PositionDoor(Vector2 pos)
+    {
+      GameObject newDoor = door;
+      Instantiate(newDoor, new Vector3(pos.x, 0.5f, pos.y), Quaternion.identity).transform.SetParent(doorsContainer.transform);
     }
 
     void PlaceCoin(Vector2 pos)
