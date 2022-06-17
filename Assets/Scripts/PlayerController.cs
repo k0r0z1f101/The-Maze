@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
   [Header("Pièces ramassées")]
   [SerializeField]
   private int numberCoins;
-  private Player.Inventory _inventory;
+  private Inventory _inventory;
 
   //audio
   private AudioSource audioSource;

@@ -13,8 +13,10 @@ public class GameController : MonoBehaviour
     private List<Vector2> convertedWalls;
     //list of converted coins
     private List<Vector2> convertedCoins;
-    //list of converted doors
-    private List<Vector2> convertedDoors;
+    //list of converted doors position
+    private List<Vector2> convertedDoorsPos;
+    //list of converted doors direction
+    private List<Vector2> convertedDoorsDir;
 
     [Header("height of the walls")]
     [SerializeField]
@@ -58,9 +60,11 @@ public class GameController : MonoBehaviour
 
     void ConvPixToVec()
     {
+      List<Vector2> ignoredBlue = new List<Vector2>();
         convertedWalls = new List<Vector2>();
         convertedCoins = new List<Vector2>();
-        convertedDoors = new List<Vector2>();
+        convertedDoorsPos = new List<Vector2>();
+        convertedDoorsDir = new List<Vector2>();
         levelImg = new Texture2D(0, 0);
         levelImg = lvlImages[levelToLoad];
         int nbrOfRows = levelImg.width;
@@ -99,13 +103,33 @@ public class GameController : MonoBehaviour
                 convertedCoins.Add(new Vector2(i, j));
 
               //doors array
-              if(pixColor == blueColor)
-                convertedDoors.Add(new Vector2(i, j));
+              if (pixColor == blueColor)
+              {
+                if(!ignoredBlue.Contains(new Vector2(i, j)))
+                {
+                  convertedDoorsPos.Add(new Vector2(i, j));
+                  ignoredBlue.Add(new Vector2((float)i, (float)j));
+                  for (int e = -1; e < 2; ++e)
+                  {
+                    for (int f = -1; f < 2; ++f)
+                    {
+                      if (!(e == 0 && f == 0))
+                      {
+                        Vector2 adjBlock = new Vector2((float)(i + e), (float)(j + f));
+                        if (!ignoredBlue.Contains(adjBlock) && levelImg.GetPixel(i + e, j + f) == blueColor)
+                        {
+                          convertedDoorsDir.Add(new Vector2(e, f));
+                          ignoredBlue.Add(adjBlock);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
           }
-
     }
 
-    void Awake()
+    private void Awake()
     {
       ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
       ground.GetComponent<Renderer>().material.color = Color.red;
@@ -121,7 +145,7 @@ public class GameController : MonoBehaviour
       door.tag = "Door";
     }
 
-    void OnValidate()
+    private void OnValidate()
     {
         if(ground)
         {
@@ -162,7 +186,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void  DrawLevel()
+    private void DrawLevel()
     {
         ground.transform.localScale = new Vector3(levelImg.width * 0.1f, 0.01f, levelImg.height * 0.1f);
         ground.transform.position = new Vector3(levelImg.width * 0.5f, 0.0f, levelImg.height * 0.5f);
@@ -176,8 +200,8 @@ public class GameController : MonoBehaviour
               newBlock.transform.SetParent(ground.transform);
           }
 
-          for(int i = 0; i < convertedDoors.Count; ++i)
-            PositionDoor(new Vector2(convertedDoors[i].x, convertedDoors[i].y));
+          for(int i = 0; i < convertedDoorsPos.Count; ++i)
+            PositionDoor(i);
 
           for(int i = 0; i < convertedCoins.Count; ++i)
             PlaceCoin(new Vector2(convertedCoins[i].x, convertedCoins[i].y));
@@ -202,7 +226,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void PositionHero()
+    private void PositionHero()
     {
       //DESTROY ANY OTHER HERO
       cam.ResetPlayer();
@@ -255,10 +279,17 @@ public class GameController : MonoBehaviour
       controlScript.enabled = true;
     }
 
-    void PositionDoor(Vector2 pos)
+    void PositionDoor(int index)
     {
       GameObject newDoor = door;
-      Instantiate(newDoor, new Vector3(pos.x, 0.5f, pos.y), Quaternion.identity).transform.SetParent(doorsContainer.transform);
+      Vector2 pos = convertedDoorsPos[index];
+      Quaternion dir = new Quaternion(0,0,0,1);
+      if(convertedDoorsDir[index].x == -1 || convertedDoorsDir[index].x != 1)
+      {
+        pos.x -= 1.0f;
+        dir = new Quaternion(0,1,0,1);
+      }
+      Instantiate(newDoor, new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f), dir).transform.SetParent(doorsContainer.transform);
     }
 
     void PlaceCoin(Vector2 pos)
@@ -331,8 +362,6 @@ public class GameController : MonoBehaviour
 
     public void DisplayCoins(int off = 0)
     {
-      // Debug.Log(coins.transform.childCount - off);
-      // Debug.Log(GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>());
       string str = coins.transform.childCount - off == 1 ? "One last coin!" : (coins.transform.childCount - off == 0 ? "You won!!!" : (coins.transform.childCount - off).ToString() + " Coins left");
       GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>().text = str;
     }
