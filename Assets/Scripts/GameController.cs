@@ -17,6 +17,8 @@ public class GameController : MonoBehaviour
     private List<Vector2> convertedDoorsPos;
     //list of converted doors direction
     private List<Vector2> convertedDoorsDir;
+    //list of converted breakable walls
+    private List<Vector2> convertedBreakWalls;
 
     [Header("height of the walls")]
     [SerializeField]
@@ -36,6 +38,7 @@ public class GameController : MonoBehaviour
     private GameObject ground;
     private GameObject coins;
     private GameObject doorsContainer;
+    private GameObject breakableWalls;
 
     //Color mode, will copy the pictures each pixel to wall colors
     [Header("colored walls if true")]
@@ -56,8 +59,10 @@ public class GameController : MonoBehaviour
     private Vector2 ballPos;
 
     GameObject ball;
-
-
+    
+    //song player
+    private GameObject jukebox;
+    
     void ConvPixToVec()
     {
       List<Vector2> ignoredBlue = new List<Vector2>();
@@ -65,6 +70,7 @@ public class GameController : MonoBehaviour
         convertedCoins = new List<Vector2>();
         convertedDoorsPos = new List<Vector2>();
         convertedDoorsDir = new List<Vector2>();
+        convertedBreakWalls = new List<Vector2>();
         levelImg = new Texture2D(0, 0);
         levelImg = lvlImages[levelToLoad];
         int nbrOfRows = levelImg.width;
@@ -75,6 +81,7 @@ public class GameController : MonoBehaviour
         Color pinkColor = new Color(1.0f,0.0f,1.0f,1.0f);
         Color redColor = new Color(1.0f,0.0f,0.0f,1.0f);
         Color blueColor = new Color(0.0f,0.0f,1.0f,1.0f);
+        Color greenColor = new Color(0.0f,1.0f,0.0f,1.0f);
         for(int i = 0; i < nbrOfRows; ++i)
           for(int j = 0; j < nbrOfCols; ++j)
           {
@@ -83,6 +90,10 @@ public class GameController : MonoBehaviour
               //walls array
               if(pixColor == blackColor)
                 convertedWalls.Add(new Vector2(i, j));
+              
+              //breakable walls array
+              if(pixColor == greenColor)
+                convertedBreakWalls.Add(new Vector2(i, j));
 
               //hero position
               if(pixColor == pinkColor)
@@ -157,6 +168,11 @@ public class GameController : MonoBehaviour
             Destroy(ground);
             ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.GetComponent<Renderer>().material.color = Color.red;
+            
+            breakableWalls = GameObject.Find("BreakableWallsContainer");
+            if(breakableWalls)
+              Destroy(breakableWalls);
+            breakableWalls = new GameObject("BreakableWallsContainer");
 
             canvasGO = GameObject.Find("Canvas");
             if(canvasGO)
@@ -183,6 +199,7 @@ public class GameController : MonoBehaviour
             DisplayCoins();
             PositionHero();
             PlaceBall();
+            AddJukebox();
         }
     }
 
@@ -198,6 +215,18 @@ public class GameController : MonoBehaviour
               newBlock.transform.localScale = new Vector3(1.0f, wallsHeight, 1.0f);
               newBlock.transform.position = new Vector3(convertedWalls[i].x, (wallsHeight * 0.5f) + 0.01f, convertedWalls[i].y);
               newBlock.transform.SetParent(ground.transform);
+          }
+          
+          for (int i = 0; i < convertedBreakWalls.Count; ++i)
+          {
+            for(int j = 0; j < (int)wallsHeight; ++j)
+            {
+              GameObject newBreakWalls = Resources.Load("BreakableWalls") as GameObject;
+              newBreakWalls.transform.position = new Vector3(convertedBreakWalls[i].x, j + 1, convertedBreakWalls[i].y);
+              Instantiate(newBreakWalls, breakableWalls.transform);
+              //newBreakWalls.transform.SetParent(breakableWalls.transform);
+              print(newBreakWalls.name);
+            }
           }
 
           for(int i = 0; i < convertedDoorsPos.Count; ++i)
@@ -364,5 +393,21 @@ public class GameController : MonoBehaviour
     {
       string str = coins.transform.childCount - off == 1 ? "One last coin!" : (coins.transform.childCount - off == 0 ? "You won!!!" : (coins.transform.childCount - off).ToString() + " Coins left");
       GameObject.Find("Canvas/CoinsHUD/TextBG/Text (TMP)").GetComponent<TextMeshProUGUI>().text = str;
+    }
+
+    public void AddJukebox()
+    {
+      jukebox = GameObject.Find("Jukebox");
+      if(jukebox) Destroy(jukebox);
+      
+      jukebox = new GameObject("Jukebox");
+      jukebox.AddComponent<AudioSource>();
+      AudioSource audioSource = jukebox.GetComponent<AudioSource>();
+      audioSource.volume = 0.5f;
+      audioSource.loop = true;
+      audioSource.playOnAwake = false;
+
+      jukebox.AddComponent<Jukebox>();
+      Jukebox jukeboxScript = jukebox.GetComponent<Jukebox>();
     }
 }

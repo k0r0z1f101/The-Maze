@@ -234,7 +234,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e90bfc56329e7c73192ba302e37f45f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallsHeight: 1
+  wallsHeight: 3.95
   lvlImages:
   - {fileID: 2800000, guid: 351e05ad32c59e81d904802af534fe1c, type: 3}
   - {fileID: 2800000, guid: d1bf80bee51bc3181ab12d575cf15b96, type: 3}
