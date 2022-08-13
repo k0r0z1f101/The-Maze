@@ -61,28 +61,28 @@ ModelImporter:
       curves: []
       events:
       - time: 0.14990859
-        functionName: StepLeft
+        functionName: RunStepLeft
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
       - time: 0.41864717
-        functionName: StepRight
+        functionName: RunStepRight
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
       - time: 0.64533824
-        functionName: StepLeft
+        functionName: RunStepLeft
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
       - time: 0.89031076
-        functionName: StepRight
+        functionName: RunStepRight
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

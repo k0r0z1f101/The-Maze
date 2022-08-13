@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 // using Player.Inventory;
 
@@ -63,7 +66,6 @@ public class PlayerController : MonoBehaviour
   private AudioSource audioSource;
   private AudioClip coin;
 
-    // Start is called before the first frame update
     void Awake()
     {
       controller = GetComponent<CharacterController>();
@@ -171,17 +173,18 @@ public class PlayerController : MonoBehaviour
         audioSource.pitch = Random.Range(0.7f, 2.0f);
         audioSource.PlayOneShot(coin);
         Destroy(other.gameObject);
-        // GameObject.Find("GameController").GetComponent<GameController>().DestroyCoin(other.gameObject);
         ++_inventory.coins;
-        // Debug.Log(_inventory.coins);
         numberCoins = _inventory.coins;
         GameObject.Find("GameController").GetComponent<GameController>().DisplayCoins(1);
       }
     }
 
-    void OnControllerColliderHit(ControllerColliderHit hit)
+    private void OnCollisionEnter(Collision collision)
     {
-        // print the impact point
-        // Debug.Log("I impacted at: " + hit.gameObject);
+      if (collision.gameObject.CompareTag("Cube"))
+      {
+        float mag = collision.gameObject.GetComponent<Rigidbody>().velocity.magnitude;
+        collision.rigidbody.AddForceAtPosition(Vector3.up * (mag > 1.0f ? 5000000 : 1000000), collision.transform.position);
+      }
     }
 }

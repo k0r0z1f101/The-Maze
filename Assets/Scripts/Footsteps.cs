@@ -7,20 +7,16 @@ public class Footsteps : MonoBehaviour
   private AudioSource audioSource;
   private AudioClip leftStep;
   private AudioClip rightStep;
+  private AudioClip runLeftStep;
+  private AudioClip runRightStep;
     // Start is called before the first frame update
     void Awake()
     {
-      // Debug.Log(GameObject.Find("CharacterController"));
         audioSource = GetComponent<AudioSource>();
-          Debug.Log(audioSource);
         leftStep = Resources.Load("leftfootstep") as AudioClip;
         rightStep = Resources.Load("rightfootstep") as AudioClip;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        runLeftStep = Resources.Load("runleftfootstep") as AudioClip;
+        runRightStep = Resources.Load("runrightfootstep") as AudioClip;
     }
 
     void StepLeft()
@@ -31,5 +27,15 @@ public class Footsteps : MonoBehaviour
     void StepRight()
     {
       audioSource.PlayOneShot(rightStep);
+    }
+    
+    void RunStepLeft()
+    {
+      audioSource.PlayOneShot(runLeftStep);
+    }
+
+    void RunStepRight()
+    {
+      audioSource.PlayOneShot(runRightStep);
     }
 }

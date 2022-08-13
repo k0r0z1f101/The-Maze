@@ -6,6 +6,7 @@ using UnityEditor;
 using System.Reflection;
 using UnityEngine.InputSystem;
 using TMPro;
+using Unity.VisualScripting;
 
 public class GameController : MonoBehaviour
 {
@@ -205,53 +206,71 @@ public class GameController : MonoBehaviour
 
     private void DrawLevel()
     {
-        ground.transform.localScale = new Vector3(levelImg.width * 0.1f, 0.01f, levelImg.height * 0.1f);
-        ground.transform.position = new Vector3(levelImg.width * 0.5f, 0.0f, levelImg.height * 0.5f);
-        if(!colorMode)
+      ground.AddComponent<Rigidbody>();
+      Rigidbody groundRB = ground.GetComponent<Rigidbody>();
+      groundRB.useGravity = false;
+      groundRB.isKinematic = true;
+      groundRB.constraints = RigidbodyConstraints.FreezeAll;
+      ground.tag = "Ground";
+      ground.transform.localScale = new Vector3(levelImg.width * 0.1f, 0.01f, levelImg.height * 0.1f);
+      ground.transform.position = new Vector3(levelImg.width * 0.5f, 0.0f, levelImg.height * 0.5f);
+      if(!colorMode)
+      {
+        for(int i = 0; i < convertedWalls.Count; ++i)
         {
-          for(int i = 0; i < convertedWalls.Count; ++i)
+            GameObject newBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            newBlock.AddComponent<Rigidbody>();
+            Rigidbody newBlockRB = newBlock.GetComponent<Rigidbody>();
+            newBlockRB.isKinematic = true;
+            newBlockRB.useGravity = false;
+            newBlock.transform.localScale = new Vector3(1.0f, wallsHeight, 1.0f);
+            newBlock.transform.position = new Vector3(convertedWalls[i].x, (wallsHeight * 0.5f) + 0.01f, convertedWalls[i].y);
+            newBlock.transform.SetParent(ground.transform);
+        }
+        
+        for (int i = 0; i < convertedBreakWalls.Count; ++i)
+        {
+          for(int j = 0; j < (int)wallsHeight; ++j)
           {
-              GameObject newBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
-              newBlock.transform.localScale = new Vector3(1.0f, wallsHeight, 1.0f);
-              newBlock.transform.position = new Vector3(convertedWalls[i].x, (wallsHeight * 0.5f) + 0.01f, convertedWalls[i].y);
-              newBlock.transform.SetParent(ground.transform);
-          }
-          
-          for (int i = 0; i < convertedBreakWalls.Count; ++i)
-          {
-            for(int j = 0; j < (int)wallsHeight; ++j)
+            GameObject newBreakWalls = Resources.Load("BreakableWalls") as GameObject;
+            newBreakWalls.transform.position = new Vector3(convertedBreakWalls[i].x, j + 1, convertedBreakWalls[i].y);
+            GameObject newWall = Instantiate(newBreakWalls, breakableWalls.transform);
+            if (j == 0)
             {
-              GameObject newBreakWalls = Resources.Load("BreakableWalls") as GameObject;
-              newBreakWalls.transform.position = new Vector3(convertedBreakWalls[i].x, j + 1, convertedBreakWalls[i].y);
-              Instantiate(newBreakWalls, breakableWalls.transform);
-              //newBreakWalls.transform.SetParent(breakableWalls.transform);
-              print(newBreakWalls.name);
+              foreach(Transform child in newWall.transform)
+              {
+                FixedJoint childJoint = child.gameObject.AddComponent<FixedJoint>();
+                childJoint.connectedBody = groundRB;
+                childJoint.breakForce = 10000000f;
+                childJoint.breakTorque = 10000000f;
+              }
             }
           }
-
-          for(int i = 0; i < convertedDoorsPos.Count; ++i)
-            PositionDoor(i);
-
-          for(int i = 0; i < convertedCoins.Count; ++i)
-            PlaceCoin(new Vector2(convertedCoins[i].x, convertedCoins[i].y));
         }
-        else
-        {
-            levelImg = new Texture2D(0, 0);
-            levelImg = lvlImages[levelToLoad];
-            int nbrOfRows = levelImg.width;
-            int nbrOfCols = levelImg.height;
 
-            for(int i = 0; i < nbrOfRows; ++i)
-              for(int j = 0; j < nbrOfCols; ++j)
-              {
-                  Color pixColor = levelImg.GetPixel(i, j);
-                  GameObject newBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                  newBlock.transform.localScale = new Vector3(1.0f, wallsHeight, 1.0f);
-                  newBlock.transform.position = new Vector3(i, (wallsHeight * 0.5f) + 0.01f, j);
-                  newBlock.GetComponent<Renderer>().material.color = pixColor;
-                  newBlock.transform.SetParent(ground.transform);
-              }
+        for(int i = 0; i < convertedDoorsPos.Count; ++i)
+          PositionDoor(i);
+
+        for(int i = 0; i < convertedCoins.Count; ++i)
+          PlaceCoin(new Vector2(convertedCoins[i].x, convertedCoins[i].y));
+      }
+      else
+      {
+          levelImg = new Texture2D(0, 0);
+          levelImg = lvlImages[levelToLoad];
+          int nbrOfRows = levelImg.width;
+          int nbrOfCols = levelImg.height;
+
+          for(int i = 0; i < nbrOfRows; ++i)
+            for(int j = 0; j < nbrOfCols; ++j)
+            {
+                Color pixColor = levelImg.GetPixel(i, j);
+                GameObject newBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                newBlock.transform.localScale = new Vector3(1.0f, wallsHeight, 1.0f);
+                newBlock.transform.position = new Vector3(i, (wallsHeight * 0.5f) + 0.01f, j);
+                newBlock.GetComponent<Renderer>().material.color = pixColor;
+                newBlock.transform.SetParent(ground.transform);
+            }
         }
     }
 
@@ -263,6 +282,7 @@ public class GameController : MonoBehaviour
 
       //CREATE GAMEOBJECT TO ADD ROBOT KYLE TO
       GameObject characterController = new GameObject("CharacterController");
+      characterController.tag = "Player";
 
       //set hero position
       characterController.transform.position = new Vector3(pos.x, 0.0f, pos.y);
